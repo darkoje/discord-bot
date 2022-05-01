@@ -4,6 +4,8 @@ import json
 import requests
 import datetime
 
+# EVE'S FREN BOT
+
 # INSERT YOUR API KEYS HERE
 my_discord_api_key = ""
 opensea_api_key = ""
@@ -157,7 +159,6 @@ async def on_message(message):
         response = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + opensea_api_key)
         data = response.json()
 
-
         last_block = data['result']['LastBlock']
         safe_gas_price = data['result']['SafeGasPrice']
         proposed_gas_price = data['result']['ProposeGasPrice']
@@ -189,7 +190,7 @@ async def on_message(message):
 
         await message.add_reaction("🌇")
 
-        number = random.randint(1, 6500)
+        number = random.randint(0, 6499)
         image_url = "https://storage.googleapis.com/humans-metaverse/images-final/" + str(number) + ".png"
         salary_url = "https://api.kriptorog.org/hotm/" + str(number)  # {"job": "Teacher", "unclaimed": "1435.71"}
         opensea_link = "https://opensea.io/assets/0x8a9ece9d8806eb0cde56ac89ccb23a36e2c718cf/" + str(number)
@@ -233,10 +234,9 @@ async def on_message(message):
             symbol = coin['item']['symbol']
             mc_rank = coin['item']['market_cap_rank']
             urled_slug = "https://www.coingecko.com/en/coins/" + coin_id
-            thumb = coin['item']['thumb']
+            # thumb = coin['item']['thumb']
             inject = f"{count}. symbol: {symbol} | id: [{coin_id}]({urled_slug}) | name: {name} | mc_rank: {mc_rank}"
             composition = composition + inject + "\n"
-
 
         # CREATE EMBED
         embed = discord.Embed()
@@ -262,7 +262,6 @@ async def on_message(message):
             count = count + 1
             slug = single[0]
             sales = single[1]['sales']
-            # print(count, slug, sales, "sales")
             urled_slug = "https://opensea.io/collection/" + slug
             inject = f"{count}. [{slug}]({urled_slug})" + " " + str(sales) + " sales"
             composition = composition + inject + "\n"
