@@ -2,9 +2,12 @@ import discord
 import random
 import json
 import requests
+import datetime
 
 # INSERT YOUR OWN DISCORD BOT API HERE
 my_discord_api_key = ""
+
+opensea_api_key = ""
 
 # LOAD CLIENT
 client = discord.Client()
@@ -20,6 +23,17 @@ with open('reactions.json', encoding="utf8") as json_file:
 reactions_dict = reactions_data
 
 
+# GET TRENDING COINS
+def get_trending_coins():
+    api_url = "https://api.coingecko.com/api/v3/search/trending"
+    try:
+        data = requests.get(api_url).json()
+    except Exception as e:
+        print(e)
+        data = {"coins": [{"item":{"id":"none","name":"Not found","symbol":"?","market_cap_rank":0,"thumb":""}}],"exchanges": []}
+    return data
+
+
 # CONVERT ETH TO USD BY USING CURRENT PRICE FROM COINGECKO
 def convert_eth_to_usd(quantity_eth):
     api_url = "https://api.coingecko.com/api/v3/coins/ethereum"
@@ -28,6 +42,16 @@ def convert_eth_to_usd(quantity_eth):
     eth_price = round(float(eth_price), 2)
     price_usd = eth_price * quantity_eth
     return price_usd
+
+
+# GET RAT MILK BALANCE
+def get_rat_milk_balance(wallet_address):
+    url = "https://www.theweirdos.com/api/participant?wallet=" + wallet_address
+    balance = requests.request("GET", url).json()[0]['amount']
+    if balance:
+        return balance
+    else:
+        return None
 
 
 # GET OPENSEA COLLECTION
@@ -62,6 +86,54 @@ def get_coingecko_coin(url):
     return name, symbol, coin_price, large_image, mc_rank, mc, price_change_percentage_1h_in_currency, price_change_percentage_24h_in_currency
 
 
+# GET OPENSEA TOP10 SOLD COLLECTIONS IN LAST 5 MINUTES
+def get_top10_sales_5min():
+    # WARNING, ONLY FOR TESTING, MY PRIVATE APPROVED AND USED KEY ! ONLY 4 CALLS PER SECOND
+    my_opensea_api_key = "bc68e5d673184678b1dc9b7239656538"
+    five_minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=5, microseconds=0))
+    timestamp_5_min_ago = str(five_minutes_ago.timestamp()).split(".")[0]
+    all_sales = {}
+
+    def get_sales(five_min_ago, next=""):
+        if not next:
+            url = "https://api.opensea.io/api/v1/events?event_type=successful&only_opensea=true&occurred_after=" + five_min_ago
+        else:
+            url = "https://api.opensea.io/api/v1/events?event_type=successful&only_opensea=true&occurred_after=" + five_min_ago + "&cursor=" + next
+        headers = {"Accept": "application/json", "X-API-KEY": my_opensea_api_key}
+        response = requests.request("GET", url, headers=headers)
+        data = response.json()
+        next = data['next']
+        sales = data['asset_events']
+
+        for sale in sales:
+            if sale['payment_token']:
+                collection_slug = sale['collection_slug']
+
+                price = (int(sale['total_price'])) / 10 ** 18
+
+                # FILTER OUT ITEMS WITH PRICE LOWER THAN 0.05
+                if price > 0.05:
+
+                    # CONSTRUCT ALL SALES DICTIONARY
+                    if collection_slug in all_sales:
+                        sales_number = all_sales[collection_slug]['sales']
+                        sales_number = sales_number + 1
+                        all_sales[collection_slug]['sales'] = sales_number
+
+                    else:
+                        all_sales[collection_slug] = {'sales': 1}
+
+        if not next:
+            return
+        else:
+            get_sales(five_min_ago, next=next)
+
+    get_sales(timestamp_5_min_ago)
+    sorted_by_sales = dict(sorted(all_sales.items(), key=lambda item: item[1]['sales'], reverse=True))
+    thetop10 = {k: sorted_by_sales[k] for k in list(sorted_by_sales)[:10]}
+    return thetop10
+
+
 # ON THE BOT START
 @client.event
 async def on_ready():
@@ -80,6 +152,64 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    # GAS PRICE FEATURE
+    if "!gwei" in message.content.lower():
+
+        await message.add_reaction("⛽")
+        response = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + opensea_api_key)
+        data = response.json()
+
+
+        last_block = data['result']['LastBlock']
+        safe_gas_price = data['result']['SafeGasPrice']
+        proposed_gas_price = data['result']['ProposeGasPrice']
+        fast_gas_price = data['result']['FastGasPrice']
+
+        currentgwei = int(safe_gas_price)
+        response2 = requests.get("https://api.etherscan.io/api?module=stats&action=ethprice&apikey=" + opensea_api_key)
+        data2 = response2.json()
+
+        ethusd = data2['result']['ethusd']
+        print("[ETH PRICE] " + str(ethusd) + "USD")
+
+        gweiusdprice = float((10 ** -9) * float(currentgwei) * float(ethusd))
+        print("[GWEI PRICE] " + str(gweiusdprice) + "USD")
+
+        # EMBED
+        embed = discord.Embed()
+        embed.add_field(name="Last block", value=str(last_block), inline=True)
+        embed.add_field(name="Safe gas price", value=str(safe_gas_price) + " GWEI", inline=False)
+        embed.add_field(name="Proposed gas price", value=str(proposed_gas_price) + " GWEI", inline=False)
+        embed.add_field(name="Fast gas price", value=str(fast_gas_price) + " GWEI", inline=False)
+        embed.add_field(name="ETH price", value=str(ethusd) + " USD", inline=True)
+        embed.add_field(name="GWEI price", value=str(gweiusdprice) + " USD", inline=True)
+
+        await message.channel.send(embed=embed)
+
+    # RANDOM HUMAN FEATURE
+    if "!random" in message.content.lower():
+
+        await message.add_reaction("🌇")
+
+        number = random.randint(1, 6500)
+        image_url = "https://storage.googleapis.com/humans-metaverse/images-final/" + str(number) + ".png"
+        salary_url = "https://api.kriptorog.org/hotm/" + str(number)  # {"job": "Teacher", "unclaimed": "1435.71"}
+        opensea_link = "https://opensea.io/assets/0x8a9ece9d8806eb0cde56ac89ccb23a36e2c718cf/" + str(number)
+
+        data = requests.get(salary_url).json()
+        job = data['job']
+        unclaimed = data['unclaimed']
+
+        # EMBED
+        embed = discord.Embed()
+        embed.set_image(url=image_url)
+        embed.add_field(name="RANDOM HUMAN", value="HUMAN #" + str(number), inline=False)
+        embed.add_field(name="JOB", value=job, inline=True)
+        embed.add_field(name="UCLAIMED $HOTM", value=unclaimed, inline=True)
+        embed.add_field(name="Opensea", value=f"[OpenSea LINK]({opensea_link})", inline=False)
+        await message.channel.send(embed=embed)
+        print("!random")
+
     # EMOJI DICT FEATURE
     for key, value in emoji_dict.items():
         if key in message.content.lower():
@@ -91,6 +221,68 @@ async def on_message(message):
         if key in message.content.lower():
             print(key)
             await message.channel.send(value)
+
+    # COINGECKO TRENDING COINS
+    if "!gecko" in message.content.lower():
+
+        coins = get_trending_coins()['coins']
+        composition = ""
+        count = 0
+        for coin in coins:
+            count = count + 1
+            coin_id = coin['item']['id']
+            name = coin['item']['name']
+            symbol = coin['item']['symbol']
+            mc_rank = coin['item']['market_cap_rank']
+            urled_slug = "https://www.coingecko.com/en/coins/" + coin_id
+            thumb = coin['item']['thumb']
+            inject = f"{count}. symbol: {symbol} | id: [{coin_id}]({urled_slug}) | name: {name} | mc_rank: {mc_rank}"
+            composition = composition + inject + "\n"
+
+
+        # CREATE EMBED
+        embed = discord.Embed()
+        embed.add_field(name="🔥🦎🦎🦎 COINGECKO TRENDING COINS 🦎🦎🦎🔥", value=composition, inline=False)
+        embed.set_footer(text="try !coin id for more info, and remember ALWAYS DYOR!")
+        await message.add_reaction("🦎")
+        await message.channel.send(embed=embed)
+        print("!gecko")
+
+    # TOP10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES FEATURE
+    if "!hot" in message.content.lower():
+
+        await message.add_reaction("⏳")
+        top10 = get_top10_sales_5min()
+
+        # CREATE EMBED
+        embed = discord.Embed()
+
+        print("TOP 10 OPENSEA SALES IN THE LAST 5 MINUTES")
+        count = 0
+        composition = ""
+        for single in top10.items():
+            count = count + 1
+            slug = single[0]
+            sales = single[1]['sales']
+            # print(count, slug, sales, "sales")
+            urled_slug = "https://opensea.io/collection/" + slug
+            inject = f"{count}. [{slug}]({urled_slug})" + " " + str(sales) + " sales"
+            composition = composition + inject + "\n"
+
+        # SEND MESSAGE
+        embed.add_field(name="🔥 TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES 🔥", value=composition, inline=False)
+        embed.set_footer(text="ALWAYS DYOR!")
+        await message.remove_reaction("⏳", client.user)
+        await message.add_reaction("✅")
+        await message.channel.send(embed=embed)
+
+    # RAT MILK BALANCE FEATURE
+    if "!milk" in message.content.lower():
+        milk_wallet = message.content.lower().split(" ")[1]
+        milk_balance = get_rat_milk_balance(milk_wallet)
+        if milk_balance:
+            await message.add_reaction("🥛")
+            await message.channel.send("**" + str(milk_balance) + " ml**" + " of rat melk!")
 
     # OPENSEA FLOOR FEATURE
     if "!floor" in message.content.lower():
