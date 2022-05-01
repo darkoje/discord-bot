@@ -3,15 +3,15 @@
 ---
 
 
-###**FEATURES**
+### **FEATURES**
 
-####EMOJI DICTIONARY
+#### EMOJI DICTIONARY
 reacts with emojis based on custom dictionary of words/expressions
 
-####GIF REACTIONS DICTIONARY
+#### GIF REACTIONS DICTIONARY
 responds with gif message based on custom dictionary of words/expressions
 
-####TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES
+#### TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES
 **`!hot`**
 
 #### RAT MILK BALANCE
