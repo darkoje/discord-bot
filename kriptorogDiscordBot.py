@@ -4,9 +4,8 @@ import json
 import requests
 import datetime
 
-# INSERT YOUR OWN DISCORD BOT API HERE
+# INSERT YOUR API KEYS HERE
 my_discord_api_key = ""
-
 opensea_api_key = ""
 
 # LOAD CLIENT
@@ -89,7 +88,6 @@ def get_coingecko_coin(url):
 # GET OPENSEA TOP10 SOLD COLLECTIONS IN LAST 5 MINUTES
 def get_top10_sales_5min():
     # WARNING, ONLY FOR TESTING, MY PRIVATE APPROVED AND USED KEY ! ONLY 4 CALLS PER SECOND
-    my_opensea_api_key = "bc68e5d673184678b1dc9b7239656538"
     five_minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=5, microseconds=0))
     timestamp_5_min_ago = str(five_minutes_ago.timestamp()).split(".")[0]
     all_sales = {}
@@ -99,7 +97,7 @@ def get_top10_sales_5min():
             url = "https://api.opensea.io/api/v1/events?event_type=successful&only_opensea=true&occurred_after=" + five_min_ago
         else:
             url = "https://api.opensea.io/api/v1/events?event_type=successful&only_opensea=true&occurred_after=" + five_min_ago + "&cursor=" + next
-        headers = {"Accept": "application/json", "X-API-KEY": my_opensea_api_key}
+        headers = {"Accept": "application/json", "X-API-KEY": opensea_api_key}
         response = requests.request("GET", url, headers=headers)
         data = response.json()
         next = data['next']
