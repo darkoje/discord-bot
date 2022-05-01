@@ -14,15 +14,17 @@ responds with gif message based on custom dictionary of words/expressions
 #### TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES
 **`!hot`**
 
+#### COINGECKO HOT COINS
+**`!gecko`**
+
 #### RANDOM HUMAN
 **`!random`**
 
 #### HUMAN NUMBER
-**`!human 420`**
+**`!human 69`**
 
 #### RAT MILK BALANCE
 **`!milk wallet_address`**
- 
 
 #### COLLECTION FLOOR PRICE ON OPENSEA 
 **`!floor collection_slug`**
