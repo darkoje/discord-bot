@@ -14,6 +14,12 @@ responds with gif message based on custom dictionary of words/expressions
 #### TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES
 **`!hot`**
 
+#### RANDOM HUMAN
+**`!random`**
+
+#### HUMAN NUMBER
+**`!human 420`**
+
 #### RAT MILK BALANCE
 **`!milk wallet_address`**
  

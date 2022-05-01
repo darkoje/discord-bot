@@ -89,7 +89,6 @@ def get_coingecko_coin(url):
 
 # GET OPENSEA TOP10 SOLD COLLECTIONS IN LAST 5 MINUTES
 def get_top10_sales_5min():
-    # WARNING, ONLY FOR TESTING, MY PRIVATE APPROVED AND USED KEY ! ONLY 4 CALLS PER SECOND
     five_minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=5, microseconds=0))
     timestamp_5_min_ago = str(five_minutes_ago.timestamp()).split(".")[0]
     all_sales = {}
@@ -184,6 +183,28 @@ async def on_message(message):
         embed.add_field(name="GWEI price", value=str(gweiusdprice) + " USD", inline=True)
 
         await message.channel.send(embed=embed)
+
+    # HUMAN FEATURE
+    if "!human" in message.content.lower():
+        await message.add_reaction("🌇")
+        number = message.content.lower().split(" ")[1]
+        image_url = "https://storage.googleapis.com/humans-metaverse/images-final/" + str(number) + ".png"
+        salary_url = "https://api.kriptorog.org/hotm/" + str(number)  # {"job": "Teacher", "unclaimed": "1435.71"}
+        opensea_link = "https://opensea.io/assets/0x8a9ece9d8806eb0cde56ac89ccb23a36e2c718cf/" + str(number)
+
+        data = requests.get(salary_url).json()
+        job = data['job']
+        unclaimed = data['unclaimed']
+
+        # EMBED
+        embed = discord.Embed()
+        embed.set_image(url=image_url)
+        embed.add_field(name="HOTM", value="HUMAN #" + str(number), inline=False)
+        embed.add_field(name="JOB", value=job, inline=True)
+        embed.add_field(name="UCLAIMED $HOTM", value=unclaimed, inline=True)
+        embed.add_field(name="Opensea", value=f"[OpenSea LINK]({opensea_link})", inline=False)
+        await message.channel.send(embed=embed)
+        print("!human")
 
     # RANDOM HUMAN FEATURE
     if "!random" in message.content.lower():
