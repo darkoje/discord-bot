@@ -9,6 +9,8 @@ import datetime
 # INSERT YOUR API KEYS HERE
 my_discord_api_key = ""
 opensea_api_key = ""
+etherscan_api_key = ""
+
 
 # LOAD CLIENT
 client = discord.Client()
@@ -151,27 +153,45 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    if message.content.lower() == "!roadmap":
+
+        await message.add_reaction("🗺")
+        embed = discord.Embed()
+        embed.add_field(name="✅ Q4 2021 **Humans of the Metaverse NFT**", value="Mint Sold out in 14 minutes", inline=True)
+        embed.add_field(name="✅ Q1 2022 **Houses and Offices**", value="A never-ending city that provides utility in a fun and engaging way for the holders. A place for other NFT projects to build and create communities.", inline=True)
+        embed.add_field(name="✅ Q1 2022 **Land sold out**", value="Land sold out!", inline=True)
+        embed.add_field(name="✅ Q1 2022 **Land and buildings new skins**", value="**Land and buildings new skins**", inline=True)
+        embed.add_field(name="✅ Q2 2022 **Meta City interface redesign**", value="Redesign the Meta City platform to support easier integrations, analytics, scalability and refactoring.", inline=True)
+        embed.add_field(name="✅ Q2 2022 **News**", value="An aggregator for the most relevant projects for our community. it aggregates discord announcements and twitter posts in one place so everyone can have an easier life within this rapidly changing market. On top of that, it will offer a set of the latests posts regarding web3 from trusted sources, such as: Binance blog, Coinbase, etc..", inline=True)
+        embed.add_field(name="✅ Q2 2022 **Alpha Club**", value="Exclusive WL and alpha for our community that can bought using $HOTM", inline=True)
+
+        embed.add_field(name="⏱  Q2 2022 **Open-source**",value="We are opening the gates to new developers that can start and build around the core of our infrastructure. Well done development will be rewarded!", inline=True)
+        embed.add_field(name="⏱ Q2 2022 **The Oracle**", value="Bigger possibilities in writing the story of your humans.", inline=True)
+        embed.add_field(name="⏱ Q2-Q3 2022 **Bank: DAO**", value="We release our DAO contract and fund the contract. The community will be able to submit and vote for initiatives that will funded from the DAO budget.", inline=True)
+        embed.add_field(name="⏱ Q3 2022 - **NFT Projects enroll**", value="We release the **B2B** functionality where NFT projects will be able to buy land from secondary markets and setup a community with features exclusively for members of their communities.", inline=True)
+        embed.add_field(name="⏱ Q4 2022 - **Museum**", value="Even though NFTs are considered investment assets, art should still be one of the primary sources of interest within this space. The MetaCity Museum will serve as a launchpad for highly talented artists to make a name for themselves.", inline=True)
+        embed.add_field(name="⏱ **Future development**", value="**Future development**", inline=True)
+
+        await message.channel.send(embed=embed)
+
+
     # GAS PRICE FEATURE
-    if "!gwei" in message.content.lower():
+    if message.content.lower() == "!gwei":
 
         await message.add_reaction("⛽")
-        response = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + opensea_api_key)
+        response = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + etherscan_api_key)
         data = response.json()
 
         last_block = data['result']['LastBlock']
         safe_gas_price = data['result']['SafeGasPrice']
         proposed_gas_price = data['result']['ProposeGasPrice']
         fast_gas_price = data['result']['FastGasPrice']
-
         currentgwei = int(safe_gas_price)
-        response2 = requests.get("https://api.etherscan.io/api?module=stats&action=ethprice&apikey=" + opensea_api_key)
+
+        response2 = requests.get("https://api.etherscan.io/api?module=stats&action=ethprice&apikey=" + etherscan_api_key)
         data2 = response2.json()
-
         ethusd = data2['result']['ethusd']
-        print("[ETH PRICE] " + str(ethusd) + "USD")
-
         gweiusdprice = float((10 ** -9) * float(currentgwei) * float(ethusd))
-        print("[GWEI PRICE] " + str(gweiusdprice) + "USD")
 
         # EMBED
         embed = discord.Embed()
@@ -268,7 +288,7 @@ async def on_message(message):
         print("!gecko")
 
     # TOP10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES FEATURE
-    if "!hot" in message.content.lower():
+    if message.content.lower() == "!hot":
 
         await message.add_reaction("⏳")
         top10 = get_top10_sales_5min()
