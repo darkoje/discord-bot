@@ -23,6 +23,12 @@ responds with gif message based on custom dictionary of words/expressions
 #### HUMAN NUMBER
 **`!human 69`**
 
+#### HOTM DAO CONSTITUTION
+**`!constitution`**
+
+#### HOTM ROADMAP
+**`!roadmap`**
+
 #### RAT MILK BALANCE
 **`!milk wallet_address`**
 
