@@ -14,6 +14,9 @@ responds with gif message based on custom dictionary of words/expressions
 #### TOP 10 OPENSEA COLLECTIONS IN THE LAST 5 MINUTES
 **`!hot`**
 
+#### GET CURRENT GAS PRICE
+**`!gwei`**
+
 #### COINGECKO HOT COINS
 **`!gecko`**
 
